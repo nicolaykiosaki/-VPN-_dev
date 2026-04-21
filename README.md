@@ -1,7 +1,7 @@
-# NeoVPN
+# О дивный новый VPN
 
-Telegram-first VPN subscription platform. A production-ready analogue of
-[YadrenoVPN](https://github.com/plushkinv/YadrenoVPN) with:
+Telegram-first VPN subscription platform (кодовое имя проекта — `neovpn`).
+Production-ready-аналог [YadrenoVPN](https://github.com/plushkinv/YadrenoVPN) с:
 
 - Friendlier bot UX — three taps from `/start` to the first VPN key;
 - Multi-panel architecture (Marzban in the MVP; Amnezia planned);
