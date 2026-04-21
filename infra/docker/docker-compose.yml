@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: neovpn
+      POSTGRES_PASSWORD: neovpn
+      POSTGRES_DB: neovpn
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neovpn"]
+      interval: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+    ports:
+      - "6379:6379"
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.python
+    env_file: ../../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.python
+    env_file: ../../.env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: ["neovpn-api", "--host", "0.0.0.0", "--port", "8000"]
+
+  bot:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.python
+    env_file: ../../.env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    command: ["neovpn-bot"]
+
+volumes:
+  pgdata:
